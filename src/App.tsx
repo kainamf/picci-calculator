@@ -58,7 +58,11 @@ function App() {
         .map((row, idx) => ({
           id: String(idx),
           nome: String(row['SERVIÇOS']).trim(),
-          valor: Number(String(row['PREÇO']).replace(/[^\d,\.]/g, '').replace(',', '.'))
+           valor: Number(
+             row['PREÇO']
+               .replace(/[R$\s\.]/g, '') // remove R$, espaços e pontos
+               .replace(',', '.') // troca vírgula por ponto
+           )
         }));
       setServicos(servicosFormatados);
     } catch (error) {
