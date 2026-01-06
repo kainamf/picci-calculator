@@ -154,7 +154,7 @@ function App() {
                     <div className="mt-6 flex justify-end">
                       <button
                         onClick={confirmar}
-                        className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold text-lg"
+                        className="px-8 py-3 bg-picci1 text-white rounded-lg hover:bg-picci2 transition-colors font-semibold text-lg"
                       >
                         Confirmar
                       </button>
@@ -203,7 +203,7 @@ function App() {
                 <div className="flex gap-3">
                   <button
                     onClick={reiniciar}
-                    className="flex-1 px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-semibold"
+                    className="flex-1 px-6 py-3 bg-picci2 text-white rounded-lg hover:bg-picci1 transition-colors font-semibold"
                   >
                     Nova Cotação
                   </button>
