@@ -36,7 +36,6 @@ function App() {
       console.log('Rows:', rows);
       // Ajuste: remover aspas e juntar colunas de preço
       const clean = (str: string) => str.replace(/^"|"$/g, '').trim();
-      const headers = rows[0].map(clean);
       const data = rows.slice(1).map(row => {
         // Juntar colunas de preço se necessário
         let servico = clean(row[0] || '');
