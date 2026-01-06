@@ -22,8 +22,9 @@ function App() {
   const carregarServicosExcel = async () => {
     try {
       // Busca o arquivo Excel via fetch
-      const response = await fetch('assets/precificação - picci.xlsx');
+      const response = await fetch('/assets/precificação - picci.xlsx');
       const arrayBuffer = await response.arrayBuffer();
+      console.log('Tipo de conteúdo retornado pelo fetch:', response.headers.get('content-type'));
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
       // Supondo que os dados estão na primeira planilha
       const sheetName = workbook.SheetNames[0];
@@ -37,6 +38,7 @@ function App() {
           nome: String(row['SERVIÇOS']).trim(),
           valor: Number(String(row['PREÇO']).replace(/[^\d,\.]/g, '').replace(',', '.'))
         }));
+      console.log('Serviços carregados do Excel:', servicosFormatados);
       setServicos(servicosFormatados);
     } catch (error) {
       console.error('Erro ao carregar serviços do Excel:', error);
