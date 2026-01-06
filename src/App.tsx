@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
-import { Calculator, X } from 'lucide-react';
+import Header from './components/Header';
+import ServicoSelector from './components/ServicoSelector';
+import ListaServicosSelecionados from './components/ListaServicosSelecionados';
+import ResumoPedido from './components/ResumoPedido';
 
 interface ServicoSelecionado {
   id: string;
@@ -67,7 +68,6 @@ function App() {
     }
   };
 
-  // Adiciona/remover serviços selecionados diretamente ao selecionar no dropdown
   const handleSelecionarServicos = (value: any[]) => {
     setServicosAtuais(value);
     setServicosSelecionados(value.map(servico => ({
@@ -109,124 +109,27 @@ function App() {
     <div className="min-h-screen bg-picciBg py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-picci1 via-picci2 to-picci3 p-8 text-white">
-            <div className="flex items-center gap-6">
-              <img src="/assets/picci-perfil.jpg" alt="Logo Picci" className="w-28 h-28 rounded-full border-4 border-picciBg shadow-lg" />
-              <div>
-                <h1 className="text-3xl font-bold">Calculadora de Serviços</h1>
-                <p className="text-picciBg mt-1">Selecione os serviços desejados e calcule o total</p>
-              </div>
-            </div>
-          </div>
-
+          <Header />
           <div className="p-8">
             {!mostrarResultado ? (
               <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">
-                    Adicionar Serviço
-                  </label>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Autocomplete
-                      multiple
-                      options={servicos}
-                      getOptionLabel={option => `${option.nome} - R$ ${Number(option.valor).toFixed(2)}`}
-                      value={servicosAtuais}
-                      onChange={(_, value) => handleSelecionarServicos(value)}
-                      disableCloseOnSelect
-                      renderInput={params => (
-                        <TextField {...params} label="Serviços" placeholder="Selecione serviços" />
-                      )}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-
-                {(servicosSelecionados.length > 0) && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-700 mb-3">
-                      Serviços Selecionados ({servicosSelecionados.length})
-                    </h3>
-                    <div className="space-y-2">
-                      {servicosSelecionados.map((servico, index) => (
-                        <div
-                          key={`${servico.id}-${index}`}
-                          className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200"
-                        >
-                          <span className="font-medium text-slate-700">{servico.nome}</span>
-                          <div className="flex items-center gap-4">
-                            <span className="text-slate-900 font-semibold">
-                              R$ {servico.valor.toFixed(2)}
-                            </span>
-                            <button
-                              onClick={() => removerServico(index)}
-                              className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
-                            >
-                              <X className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-6 flex justify-end">
-                      <button
-                        onClick={confirmar}
-                        className="px-8 py-3 bg-picci1 text-white rounded-lg hover:bg-picci2 transition-colors font-semibold text-lg"
-                      >
-                        Confirmar
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {(servicosSelecionados.length === 0) && (
-                  <div className="text-center py-12 text-slate-400">
-                    <Calculator className="w-16 h-16 mx-auto mb-3 opacity-30" />
-                    <p>Nenhum serviço selecionado ainda</p>
-                    <p className="text-sm mt-1">Selecione serviços acima e clique em Confirmar</p>
-                  </div>
-                )}
+                <ServicoSelector
+                  servicos={servicos}
+                  servicosAtuais={servicosAtuais}
+                  onSelecionar={handleSelecionarServicos}
+                />
+                <ListaServicosSelecionados
+                  servicosSelecionados={servicosSelecionados}
+                  onRemover={removerServico}
+                  onConfirmar={confirmar}
+                />
               </div>
             ) : (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    Resumo do Pedido
-                  </h3>
-                  <div className="space-y-3">
-                    {servicosSelecionados.map((servico, index) => (
-                      <div
-                        key={`${servico.id}-${index}`}
-                        className="flex justify-between items-center p-4 bg-slate-50 rounded-lg"
-                      >
-                        <span className="font-medium text-slate-700">{servico.nome}</span>
-                        <span className="text-slate-900 font-semibold">
-                          R$ {servico.valor.toFixed(2)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="border-t-2 border-slate-200 pt-6">
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-slate-800">Total</span>
-                    <span className="text-3xl font-bold text-green-600">
-                      R$ {calcularTotal().toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={reiniciar}
-                    className="flex-1 px-6 py-3 bg-picci2 text-white rounded-lg hover:bg-picci1 transition-colors font-semibold"
-                  >
-                    Nova Cotação
-                  </button>
-                </div>
-              </div>
+              <ResumoPedido
+                servicosSelecionados={servicosSelecionados}
+                total={calcularTotal()}
+                onNovaCotacao={reiniciar}
+              />
             )}
           </div>
         </div>
