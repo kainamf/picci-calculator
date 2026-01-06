@@ -86,22 +86,22 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-slate-600">Carregando...</div>
+      <div className="min-h-screen bg-picciBg flex items-center justify-center">
+        <div className="text-picci3">Carregando...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
+    <div className="min-h-screen bg-picciBg py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-700 to-slate-900 p-8 text-white">
-            <div className="flex items-center gap-3">
-              <Calculator className="w-10 h-10" />
+          <div className="bg-gradient-to-r from-picci1 via-picci2 to-picci3 p-8 text-white">
+            <div className="flex items-center gap-6">
+              <img src="/assets/picci-perfil.jpg" alt="Logo Picci" className="w-28 h-28 rounded-full border-4 border-picciBg shadow-lg" />
               <div>
                 <h1 className="text-3xl font-bold">Calculadora de Serviços</h1>
-                <p className="text-slate-300 mt-1">Selecione os serviços desejados e calcule o total</p>
+                <p className="text-picciBg mt-1">Selecione os serviços desejados e calcule o total</p>
               </div>
             </div>
           </div>
