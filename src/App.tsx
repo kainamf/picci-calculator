@@ -1,4 +1,10 @@
 import { useEffect, useState } from 'react';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import Checkbox from '@mui/material/Checkbox';
+import ListItemText from '@mui/material/ListItemText';
 import { Calculator, Plus, X } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -9,9 +15,10 @@ interface ServicoSelecionado {
 }
 
 function App() {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
   const [servicos, setServicos] = useState<any[]>([]);
   const [servicosSelecionados, setServicosSelecionados] = useState<ServicoSelecionado[]>([]);
-  const [servicoAtual, setServicoAtual] = useState<string>('');
+  const [servicosAtuais, setServicosAtuais] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [mostrarResultado, setMostrarResultado] = useState(false);
 
@@ -47,21 +54,21 @@ function App() {
     }
   };
 
-  const adicionarServico = () => {
-    if (!servicoAtual) return;
-
-    const servico = servicos.find(s => s.id === servicoAtual);
-    if (!servico) return;
-
+  // Adiciona/remover serviços selecionados diretamente ao selecionar no dropdown
+  const handleSelecionarServicos = (value: string[]) => {
+    setServicosAtuais(value);
+    const novosServicos = value
+      .map(id => servicos.find(s => s.id === id))
+      .filter(Boolean)
+      .filter(s => !servicosSelecionados.some(sel => sel.id === s.id));
     setServicosSelecionados([
       ...servicosSelecionados,
-      {
+      ...novosServicos.map(servico => ({
         id: servico.id,
         nome: servico.nome,
         valor: servico.valor,
-      },
+      }))
     ]);
-    setServicoAtual('');
   };
 
   const removerServico = (index: number) => {
@@ -81,7 +88,7 @@ function App() {
   const reiniciar = () => {
     setServicosSelecionados([]);
     setMostrarResultado(false);
-    setServicoAtual('');
+    setServicosAtuais([]);
   };
 
   if (loading) {
@@ -113,27 +120,45 @@ function App() {
                   <label className="block text-sm font-semibold text-slate-700 mb-3">
                     Adicionar Serviço
                   </label>
-                  <div className="flex gap-3">
-                    <select
-                      value={servicoAtual}
-                      onChange={(e) => setServicoAtual(e.target.value)}
-                      className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-slate-500 focus:ring-2 focus:ring-slate-200 outline-none transition-all"
-                    >
-                      <option value="">Selecione um serviço</option>
-                      {servicos.map((servico: any) => (
-                        <option key={servico.id || servico.nome} value={servico.id || servico.nome}>
-                          {servico.nome} - R$ {Number(servico.valor).toFixed(2)}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={adicionarServico}
-                      disabled={!servicoAtual}
-                      className="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2 font-medium"
-                    >
-                      <Plus className="w-5 h-5" />
-                      Adicionar
-                    </button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <FormControl className="flex-1 relative" size="medium">
+                      <InputLabel id="servicos-label">Serviços</InputLabel>
+                      <Select
+                        labelId="servicos-label"
+                        multiple
+                        value={servicosAtuais}
+                        open={dropdownOpen}
+                        onOpen={() => setDropdownOpen(true)}
+                        onClose={() => setDropdownOpen(false)}
+                        onChange={e => {
+                          const value = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                          handleSelecionarServicos(value);
+                        }}
+                        renderValue={selected =>
+                          servicos
+                            .filter(s => selected.includes(s.id))
+                            .map(s => s.nome)
+                            .join(', ')
+                        }
+                      >
+                        {servicos.map((servico: any) => (
+                          <MenuItem key={servico.id} value={servico.id}>
+                            <Checkbox checked={servicosAtuais.indexOf(servico.id) > -1} />
+                            <ListItemText primary={`${servico.nome} - R$ ${Number(servico.valor).toFixed(2)}`} />
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {dropdownOpen && (
+                        <button
+                          type="button"
+                          className="absolute top-2 right-2 z-10 bg-picciBg rounded-full p-1 shadow hover:bg-picci3 hover:text-white transition-colors"
+                          onClick={() => setDropdownOpen(false)}
+                          aria-label="Fechar dropdown"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      )}
+                    </FormControl>
                   </div>
                 </div>
 
