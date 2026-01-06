@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
-import FormControl from '@mui/material/FormControl';
-import Checkbox from '@mui/material/Checkbox';
-import ListItemText from '@mui/material/ListItemText';
-import { Calculator, Plus, X } from 'lucide-react';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import { Calculator, X } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface ServicoSelecionado {
@@ -15,10 +11,9 @@ interface ServicoSelecionado {
 }
 
 function App() {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
   const [servicos, setServicos] = useState<any[]>([]);
   const [servicosSelecionados, setServicosSelecionados] = useState<ServicoSelecionado[]>([]);
-  const [servicosAtuais, setServicosAtuais] = useState<string[]>([]);
+  const [servicosAtuais, setServicosAtuais] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mostrarResultado, setMostrarResultado] = useState(false);
 
@@ -55,20 +50,13 @@ function App() {
   };
 
   // Adiciona/remover serviços selecionados diretamente ao selecionar no dropdown
-  const handleSelecionarServicos = (value: string[]) => {
+  const handleSelecionarServicos = (value: any[]) => {
     setServicosAtuais(value);
-    const novosServicos = value
-      .map(id => servicos.find(s => s.id === id))
-      .filter(Boolean)
-      .filter(s => !servicosSelecionados.some(sel => sel.id === s.id));
-    setServicosSelecionados([
-      ...servicosSelecionados,
-      ...novosServicos.map(servico => ({
-        id: servico.id,
-        nome: servico.nome,
-        valor: servico.valor,
-      }))
-    ]);
+    setServicosSelecionados(value.map(servico => ({
+      id: servico.id,
+      nome: servico.nome,
+      valor: servico.valor,
+    })));
   };
 
   const removerServico = (index: number) => {
@@ -121,48 +109,22 @@ function App() {
                     Adicionar Serviço
                   </label>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <FormControl className="flex-1 relative" size="medium">
-                      <InputLabel id="servicos-label">Serviços</InputLabel>
-                      <Select
-                        labelId="servicos-label"
-                        multiple
-                        value={servicosAtuais}
-                        open={dropdownOpen}
-                        onOpen={() => setDropdownOpen(true)}
-                        onClose={() => setDropdownOpen(false)}
-                        onChange={e => {
-                          const value = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
-                          handleSelecionarServicos(value);
-                        }}
-                        renderValue={selected =>
-                          servicos
-                            .filter(s => selected.includes(s.id))
-                            .map(s => s.nome)
-                            .join(', ')
-                        }
-                      >
-                        {servicos.map((servico: any) => (
-                          <MenuItem key={servico.id} value={servico.id}>
-                            <Checkbox checked={servicosAtuais.indexOf(servico.id) > -1} />
-                            <ListItemText primary={`${servico.nome} - R$ ${Number(servico.valor).toFixed(2)}`} />
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {dropdownOpen && (
-                        <button
-                          type="button"
-                          className="absolute top-2 right-2 z-10 bg-picciBg rounded-full p-1 shadow hover:bg-picci3 hover:text-white transition-colors"
-                          onClick={() => setDropdownOpen(false)}
-                          aria-label="Fechar dropdown"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
+                    <Autocomplete
+                      multiple
+                      options={servicos}
+                      getOptionLabel={option => `${option.nome} - R$ ${Number(option.valor).toFixed(2)}`}
+                      value={servicosAtuais}
+                      onChange={(_, value) => handleSelecionarServicos(value)}
+                      disableCloseOnSelect
+                      renderInput={params => (
+                        <TextField {...params} label="Serviços" placeholder="Selecione serviços" />
                       )}
-                    </FormControl>
+                      className="flex-1"
+                    />
                   </div>
                 </div>
 
-                {servicosSelecionados.length > 0 && (
+                {(servicosSelecionados.length > 0) && (
                   <div>
                     <h3 className="text-sm font-semibold text-slate-700 mb-3">
                       Serviços Selecionados ({servicosSelecionados.length})
@@ -200,11 +162,11 @@ function App() {
                   </div>
                 )}
 
-                {servicosSelecionados.length === 0 && (
+                {(servicosSelecionados.length === 0) && (
                   <div className="text-center py-12 text-slate-400">
                     <Calculator className="w-16 h-16 mx-auto mb-3 opacity-30" />
                     <p>Nenhum serviço selecionado ainda</p>
-                    <p className="text-sm mt-1">Selecione serviços acima para começar</p>
+                    <p className="text-sm mt-1">Selecione serviços acima e clique em Confirmar</p>
                   </div>
                 )}
               </div>
