@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { Calculator, X } from 'lucide-react';
-import * as XLSX from 'xlsx';
 
 interface ServicoSelecionado {
   id: string;
@@ -23,27 +22,46 @@ function App() {
 
   const carregarServicosExcel = async () => {
     try {
-      // Busca o arquivo Excel via fetch
-      const response = await fetch('/assets/precificação - picci.xlsx');
-      const arrayBuffer = await response.arrayBuffer();
-      console.log('Tipo de conteúdo retornado pelo fetch:', response.headers.get('content-type'));
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      // Supondo que os dados estão na primeira planilha
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(worksheet);
+      // ID da planilha e nome da aba
+      const sheetId = '1JwsB9ibBEsLTubN5l1ihgMVkLfGDbZyb';
+      const sheetName = 'Planilha1'; // Altere se o nome da aba for diferente
+      // URL pública para exportar como CSV
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${sheetName}`;
+      const response = await fetch(url);
+      const csvText = await response.text();
+      // LOG para depuração do CSV
+      console.log('CSV bruto:', csvText);
+      const rows = csvText.split('\n').filter(Boolean).map(row => row.split(','));
+      console.log('Rows:', rows);
+      // Ajuste: remover aspas e juntar colunas de preço
+      const clean = (str: string) => str.replace(/^"|"$/g, '').trim();
+      const headers = rows[0].map(clean);
+      const data = rows.slice(1).map(row => {
+        // Juntar colunas de preço se necessário
+        let servico = clean(row[0] || '');
+        let preco = '';
+        if (row.length >= 3) {
+          preco = clean((row[1] || '') + ',' + (row[2] || ''));
+        } else {
+          preco = clean(row[1] || '');
+        }
+        return {
+          SERVIÇOS: servico,
+          PREÇO: preco
+        };
+      });
+      console.log('Data parsed ajustado:', data);
       // Filtra e adapta para o formato esperado
       const servicosFormatados = data
-        .filter((row: any) => row['SERVIÇOS'] && row['PREÇO'])
-        .map((row: any, idx: number) => ({
+        .filter(row => row['SERVIÇOS'] && row['PREÇO'])
+        .map((row, idx) => ({
           id: String(idx),
           nome: String(row['SERVIÇOS']).trim(),
           valor: Number(String(row['PREÇO']).replace(/[^\d,\.]/g, '').replace(',', '.'))
         }));
-      console.log('Serviços carregados do Excel:', servicosFormatados);
       setServicos(servicosFormatados);
     } catch (error) {
-      console.error('Erro ao carregar serviços do Excel:', error);
+      console.error('Erro ao carregar serviços do Google Sheets:', error);
     } finally {
       setLoading(false);
     }
